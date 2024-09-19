@@ -23,6 +23,8 @@ interface State {
   wmtsLayers: __esri.Layer[];
   selectedLayer: string;
   selectedDate: Date;
+  // Added an end date to the state
+  endDate: Date;
   layerOptions: { title: string; id: string; description: string; collectionId: string }[];
   WMTSError: string;
   configurationExtent: __esri.Extent;
@@ -54,6 +56,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     wmtsLayers: [],
     selectedLayer: "",
     selectedDate: null,
+    // Added an end date to the state
+    endDate: null,
     layerOptions: [],
     WMTSError: null,
     configurationExtent: null,
@@ -63,6 +67,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   constructor(props) {
     super(props);
     this.handleDateChange = this.handleDateChange.bind(this);
+    // Added a new function to handle the end date change
+    this.handleSecondDateChange = this.handleSecondDateChange.bind(this);
     this.handleLayerChange = this.handleLayerChange.bind(this);
   }
 
@@ -100,6 +106,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   };
 
+  // Added an end date to the createWmts function
   handleLayerChange = (event) => {
 
     const newLayer = event.target.value;
@@ -107,19 +114,21 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     if (this.state.selectedDate && newLayer) {
       const isoString = this.state.selectedDate.toISOString().split('T')[0];
-      this.addWMTSLayer(this.createWmts(isoString, newLayer));
+      const isoEndString = this.state.endDate.toISOString().split('T')[0];
+      this.addWMTSLayer(this.createWmts(isoString, isoEndString, newLayer));
     }
 
   };
 
-  handleDateChange = (newDate) => {
-
-    if (newDate) {
-      const isoString = newDate.toISOString().split('T')[0];
-      this.setState({ selectedDate: newDate });
+  handleDateChange = (newStartDate) => {
+    // If a new start for the date is selected update start date and end date
+    if (newStartDate){
+      const isoString = newStartDate.toISOString().split('T')[0];
+      this.setState({ selectedDate: newStartDate });
+      this.setState({ endDate: newStartDate });
 
       if (this.state.selectedLayer) {
-        this.addWMTSLayer(this.createWmts(isoString, this.state.selectedLayer));
+        this.addWMTSLayer(this.createWmts(isoString, isoString, this.state.selectedLayer));
       } else {
         console.log("No valid layer selected.")
       }
@@ -128,6 +137,28 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       this.setState({ selectedDate: null });
     }
   };
+  
+  // Newly added function that creates a new WMTS layer based on the end date
+  handleSecondDateChange = (newEndDate) => {
+
+    if (newEndDate && this.state.selectedDate) {
+      const isoEndString = newEndDate.toISOString().split('T')[0];
+      const isoStartString = this.state.selectedDate.toISOString().split('T')[0];
+
+      this.setState({ endDate: newEndDate });
+
+      if (this.state.selectedLayer) {
+        this.addWMTSLayer(this.createWmts(isoStartString, isoEndString, this.state.selectedLayer));
+      } else {
+        console.log("No valid layer selected.")
+      }
+    } else {
+      console.log("No valid date selected.")
+      this.setState({ selectedDate: null });
+    }
+  };
+
+
 
 
   // Set the map extent to match the configuration extent
@@ -150,7 +181,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   };
 
   // Function to generate WMTS layer based on date
-  createWmts = (inDate: string, inLayer: string): __esri.WMTSLayer => {
+  //changed this to have out date
+  createWmts = (startDate: string, endDate: string, inLayer: string): __esri.WMTSLayer => {
 
     const Layer = inLayer;
 
@@ -159,7 +191,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     const wmtsUrl = `${baseUrl}/${configuration_id}`
 
     const customParams = {
-      "TIME": `${inDate}/${inDate}`,
+      // Two dates instead of one
+      "TIME": `${startDate}/${endDate}`,
       "LAYER": Layer,
       "transparent": "true"
     };
@@ -247,11 +280,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
 
     return (
-      <div className="widget-use-map-view" style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+      <div className="widget-use-map-view" style={{ width: '100%', height: '120%', overflow: 'hidden' }}>
 
         <JimuMapViewComponent useMapWidgetId={this.props.useMapWidgetIds?.[0]} onActiveViewChange={this.onActiveViewChange}></JimuMapViewComponent>
 
-        <h2>Planet Imagery</h2>
+        
         <div>
           <LayerSelector
             selectedLayer={this.state.selectedLayer}
@@ -271,8 +304,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         <div>
           <DateSelector
             selectedDate={this.state.selectedDate}
+            // Allows to select two dates 
+            endDate={this.state.endDate}
             accessToken={this.state.accessToken}
             handleDateChange={this.handleDateChange}
+            //Handle second date change function
+            handleSecondDateChange={this.handleSecondDateChange}
             collectionID={this.props.config.sentinelHubConfiguration.collection_id}
             getMapExtent={this.getMapExtent}
           />

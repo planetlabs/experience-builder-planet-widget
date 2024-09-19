@@ -93,8 +93,10 @@ async function getAvailableDates(monthStart: Date, extent: any, accessToken: str
 
 interface DateSelectorProps {
     selectedDate: Date | null;
+    endDate: Date | null;
     accessToken: string;
-    handleDateChange: (date: Date | null) => void;
+    handleDateChange: (selectedDate: Date | null) => void;
+    handleSecondDateChange: (endDate: Date | null) => void;
     collectionID: string;
     getMapExtent: (wkid: number) => any;
 }
@@ -128,7 +130,7 @@ const CustomDay: React.FC<CustomDayProps> = (props) => {
     );
 };
 
-const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, accessToken, handleDateChange, collectionID, getMapExtent }) => {
+const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, endDate, accessToken, handleDateChange, handleSecondDateChange, collectionID, getMapExtent }) => {
     const [availableDates, setAvailableDates] = useState<string[]>([]);
     const startDate = new Date();
 
@@ -171,7 +173,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, accessToken, 
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <div>
                 <DatePicker
-                    label="Date"
+                    label="Start Date"
                     onChange={(newDate) => handleDateChange(newDate)}
                     value={selectedDate}
                     onMonthChange={handleMonthChange}
@@ -181,6 +183,13 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, accessToken, 
                             helperText: 'Select a date to view data',
                         }
                     }}
+                />
+                <DatePicker
+                    label="End Date"
+                    onChange={(newDate) => handleSecondDateChange(newDate)}
+                    value={endDate}
+                    onMonthChange={handleMonthChange}
+                    slots={{ day: (dayProps) => <CustomDay {...dayProps} availableDates={availableDates} selectedDate={selectedDate} /> }}
                 />
             </div>
         </LocalizationProvider>
