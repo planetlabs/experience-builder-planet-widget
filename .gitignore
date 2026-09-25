@@ -1,5 +1,17 @@
-# Ignoring creds.json in all folders
-**/creds.json
+# Local settings, not shared
+.claude/settings.local.json
 
-# Environment variables
+# Credentials
+**/creds.json
 .env
+
+# Node
+node_modules/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# The reverse proxy reference implementation. Held back for now; it will be
+# published once its OAuth2 story is settled.
+/planet-proxy

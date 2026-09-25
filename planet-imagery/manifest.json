@@ -1,0 +1,33 @@
+{
+  "name": "planet-imagery",
+  "label": "Planet Imagery",
+  "type": "widget",
+  "version": "1.15.0",
+  "exbVersion": "1.15.0",
+  "author": "Planet Labs PBC",
+  "description": "Browse Planet Mosaics, search daily PlanetScope scenes, stream a hosted imagery collection, and hand locations off to Planet tasking",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {},
+  "dataActions": [
+    {
+      "name": "search-area",
+      "label": "Search Planet imagery here",
+      "uri": "data-actions/useAsSearchArea",
+      "icon": "runtime/assets/icons/search-area.svg"
+    },
+    {
+      "name": "tasked-imagery",
+      "label": "Load tasked imagery here",
+      "uri": "data-actions/loadTaskedImagery",
+      "icon": "runtime/assets/icons/tasked-imagery.svg"
+    }
+  ],
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 400,
+    "height": 400
+  }
+}
